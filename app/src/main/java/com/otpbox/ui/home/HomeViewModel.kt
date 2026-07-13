@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.otpbox.data.settings.SettingsRepository
 import com.otpbox.data.settings.SortOrder
-import com.otpbox.domain.model.OtpCode
 import com.otpbox.domain.model.OtpEntry
 import com.otpbox.domain.otp.TotpGenerator
 import com.otpbox.data.repo.OtpRepository
@@ -20,7 +19,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class HomeItem(val entry: OtpEntry, val code: OtpCode)
+data class HomeItem(val entry: OtpEntry, val code: String)
 
 data class HomeUiState(
     val items: List<HomeItem> = emptyList(),
@@ -71,7 +70,7 @@ class HomeViewModel @Inject constructor(
             val remaining = (refPeriod - (secs % refPeriod)).toInt()
             HomeUiState(
                 items = sorted.map { entry ->
-                    HomeItem(entry, TotpGenerator.codeFor(entry, now))
+                    HomeItem(entry, TotpGenerator.codeFor(entry, now).code)
                 },
                 query = q,
                 sortOrder = sort,

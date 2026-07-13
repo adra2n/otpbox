@@ -169,7 +169,7 @@ fun HomeScreen(
                         OtpCard(
                             item = item,
                             onCopy = {
-                                clipboard.setText(AnnotatedString(item.code.code))
+                                clipboard.setText(AnnotatedString(item.code))
                                 scope.launch { snackbar.showSnackbar("验证码已复制") }
                             },
                             onOpenDetail = { onOpenDetail(item.entry.id) }
@@ -285,7 +285,7 @@ private fun OtpCard(
                 }
                 Spacer(Modifier.size(4.dp))
                 Text(
-                    text = formatCode(item.code.code),
+                    text = formatCode(item.code),
                     fontFamily = FontFamily.Monospace,
                     fontWeight = FontWeight.Bold,
                     fontSize = 28.sp,
