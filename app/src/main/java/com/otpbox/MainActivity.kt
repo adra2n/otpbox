@@ -66,6 +66,7 @@ class MainActivity : FragmentActivity() {
         setContent {
             OTPBoxTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
+                    OtpNavHost()
                     if (lockedState.value) {
                         LockScreen(
                             pinEnabled = pinManager.isPinSet,
@@ -75,8 +76,6 @@ class MainActivity : FragmentActivity() {
                                 pinManager.verify(pin).also { if (it) lockedState.value = false }
                             }
                         )
-                    } else {
-                        OtpNavHost()
                     }
                 }
             }

@@ -39,7 +39,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -64,31 +66,6 @@ fun SettingsScreen(
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var showPinDialog by remember { mutableStateOf(false) }
 
-    var exportContent by remember { mutableStateOf<String?>(null) }
-
-    val exportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("application/json")
-    ) { uri: Uri? ->
-        val content = exportContent
-        exportContent = null
-        if (uri != null && content != null) {
-            val ok = runCatching {
-                context.contentResolver.openOutputStream(uri)
-                    ?.use { it.write(content.toByteArray()) }
-            }.isSuccess
-            viewModel.exportConsumed()
-            if (!ok) viewModel.setMessage("导出失败：文件无法写入")
-        } else {
-            viewModel.exportConsumed()
-        }
-    }
-
-    LaunchedEffect(state.pendingExport) {
-        if (state.pendingExport != null) {
-            exportContent = state.pendingExport
-            exportLauncher.launch("otpbox-backup.json")
-        }
-    }
     LaunchedEffect(state.message) {
         state.message?.let {
             snackbar.showSnackbar(it)
@@ -227,6 +204,25 @@ private fun BackupSyncSettings(
     state: SettingsUiState,
     viewModel: SettingsViewModel
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var exportContent by remember { mutableStateOf<String?>(null) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri: Uri? ->
+        val content = exportContent
+        exportContent = null
+        if (uri != null && content != null) {
+            val ok = runCatching {
+                context.contentResolver.openOutputStream(uri)
+                    ?.use { it.write(content.toByteArray()) }
+            }.isSuccess
+            if (ok) viewModel.exportConsumed()
+            else viewModel.setMessage("导出失败：文件无法写入")
+        }
+    }
+
     var backupPw by remember { mutableStateOf("") }
     var githubToken by remember { mutableStateOf("") }
     var gistId by remember { mutableStateOf(state.gistId) }
@@ -255,7 +251,20 @@ private fun BackupSyncSettings(
         ) { Text("保存备份密码") }
 
         SectionTitle("导出")
-        OutlinedButton(onClick = viewModel::requestExport, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(
+            onClick = {
+                scope.launch {
+                    val envelope = viewModel.exportEnvelope()
+                    if (envelope == null) {
+                        viewModel.setMessage("请先设置备份密码")
+                    } else {
+                        exportContent = envelope
+                        exportLauncher.launch("otpbox-backup.json")
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("导出加密备份")
         }
 

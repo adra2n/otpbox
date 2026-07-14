@@ -121,17 +121,10 @@ class SettingsViewModel @Inject constructor(
         _state.update { it.copy(message = msg) }
     }
 
-    fun requestExport() {
-        val pw = securePrefs.backupPassword
-        if (pw.isNullOrBlank()) {
-            _state.update { it.copy(message = "Set a backup password first") }
-            return
-        }
-        viewModelScope.launch {
-            val entries = repository.getAllIncludingDeleted().filter { !it.deleted }
-            val envelope = encryptor.encrypt(BackupContent(entries = entries), pw)
-            _state.update { it.copy(pendingExport = envelope) }
-        }
+    suspend fun exportEnvelope(): String? {
+        val pw = securePrefs.backupPassword ?: return null
+        val entries = repository.getAllIncludingDeleted().filter { !it.deleted }
+        return encryptor.encrypt(BackupContent(entries = entries), pw)
     }
 
     fun exportConsumed() {

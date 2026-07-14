@@ -19,12 +19,14 @@ object JsonBackupImporter {
 
     sealed interface Result {
         data class Success(val entries: List<OtpEntry>) : Result
+        data object Encrypted : Result
         data class Error(val message: String) : Result
     }
 
     fun import(text: String): Result = try {
         val root = json.parseToJsonElement(text).jsonObject
         when {
+            root["format"]?.jsonPrimitive?.content == "otpbox" -> Result.Encrypted
             root.containsKey("db") -> Result.Success(importAegis(root))
             root.containsKey("entries") -> Result.Success(importOwn(text))
             else -> Result.Error("Unrecognized backup file")

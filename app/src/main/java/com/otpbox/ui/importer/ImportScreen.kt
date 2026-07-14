@@ -12,13 +12,19 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -81,8 +87,8 @@ fun ImportScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                "Import accounts from a JSON backup (OTPBox or Aegis unencrypted) " +
-                    "or from an image containing a QR code.",
+                "Import accounts from a JSON backup (OTPBox encrypted or unencrypted, " +
+                    "or Aegis unencrypted) or from an image containing a QR code.",
                 style = MaterialTheme.typography.bodyMedium
             )
             Button(
@@ -97,6 +103,33 @@ fun ImportScreen(
             ) {
                 Text("Import QR from image")
             }
+
+            if (state.needPassword) {
+                var password by remember { mutableStateOf("") }
+                Text(
+                    "该备份文件已加密，请输入备份密码以解密导入。",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("备份密码") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Button(
+                    onClick = { viewModel.importEncrypted(password) },
+                    enabled = password.isNotBlank(),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("解密并导入")
+                }
+                TextButton(onClick = { viewModel.setError("已取消加密备份导入") }) {
+                    Text("取消")
+                }
+            }
+
             state.message?.let {
                 Text(
                     it,
