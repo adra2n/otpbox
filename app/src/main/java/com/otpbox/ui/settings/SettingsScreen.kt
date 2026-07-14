@@ -64,20 +64,28 @@ fun SettingsScreen(
     var selectedCategory by remember { mutableStateOf<String?>(null) }
     var showPinDialog by remember { mutableStateOf(false) }
 
+    var exportContent by remember { mutableStateOf<String?>(null) }
+
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri: Uri? ->
-        val content = state.pendingExport
+        val content = exportContent
+        exportContent = null
         if (uri != null && content != null) {
-            runCatching {
-                context.contentResolver.openOutputStream(uri)?.use { it.write(content.toByteArray()) }
-            }
+            val ok = runCatching {
+                context.contentResolver.openOutputStream(uri)
+                    ?.use { it.write(content.toByteArray()) }
+            }.isSuccess
+            viewModel.exportConsumed()
+            if (!ok) viewModel.setMessage("导出失败：文件无法写入")
+        } else {
             viewModel.exportConsumed()
         }
     }
 
     LaunchedEffect(state.pendingExport) {
         if (state.pendingExport != null) {
+            exportContent = state.pendingExport
             exportLauncher.launch("otpbox-backup.json")
         }
     }

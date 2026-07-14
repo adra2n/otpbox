@@ -117,6 +117,10 @@ class SettingsViewModel @Inject constructor(
         _state.update { it.copy(message = null) }
     }
 
+    fun setMessage(msg: String) {
+        _state.update { it.copy(message = msg) }
+    }
+
     fun requestExport() {
         val pw = securePrefs.backupPassword
         if (pw.isNullOrBlank()) {
