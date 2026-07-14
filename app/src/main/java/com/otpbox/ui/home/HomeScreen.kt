@@ -61,8 +61,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +71,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.otpbox.data.settings.SortOrder
+import com.otpbox.security.ClipboardHelper
 import com.otpbox.ui.theme.WarnAmber
 import com.otpbox.ui.theme.avatarColorFor
 import kotlinx.coroutines.launch
@@ -88,7 +88,7 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val codes by viewModel.codes.collectAsStateWithLifecycle()
-    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var showSearch by remember { mutableStateOf(false) }
@@ -168,7 +168,7 @@ fun HomeScreen(
                     OtpCard(
                         item = live,
                         onCopy = {
-                            clipboard.setText(AnnotatedString(live.code))
+                            ClipboardHelper.copySecret(context, live.entry.issuer.ifBlank { "code" }, live.code)
                             scope.launch { snackbar.showSnackbar("验证码已复制") }
                         },
                         onOpenDetail = { onOpenDetail(item.entry.id) }
