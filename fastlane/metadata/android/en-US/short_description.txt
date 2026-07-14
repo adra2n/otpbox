@@ -1,1 +1,1 @@
-开源 TOTP 两步验证（2FA）令牌管理器
+Open-source TOTP two-factor (2FA) token manager

@@ -1,9 +1,9 @@
-口令盒子是一个开源、本地优先的 TOTP 两步验证（2FA）令牌管理器。
+OTPBox is an open-source, local-first TOTP two-factor (2FA) token manager.
 
-主要功能：
-- 离线生成 TOTP 动态验证码，支持标准 otpauth 导入
-- 相机扫码 / 手动添加账户，按类别分组与配色
-- 本地加密存储（SQLCipher），支持生物识别解锁
-- 自动锁定、敏感剪贴板（复制后定时清除）
-- 备份与恢复（导出 / 导入加密文件，可选 GitHub Gist 同步）
-- 完全离线可用，无广告、无追踪
+Key features:
+- Offline TOTP code generation, with standard otpauth import support
+- Add accounts by camera scan or manual entry, organized and color-coded by category
+- Locally encrypted storage (SQLCipher) with biometric unlock
+- Auto-lock and sensitive clipboard (auto-cleared after a timeout)
+- Backup and restore (export / import encrypted files, optional GitHub Gist sync)
+- Fully usable offline, with no ads and no tracking
