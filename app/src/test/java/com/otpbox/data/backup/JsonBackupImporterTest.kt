@@ -7,42 +7,6 @@ import org.junit.Test
 class JsonBackupImporterTest {
 
     @Test
-    fun importsOwnSchemaWithPasswords() {
-        val text = """
-            {"version":2,"entries":[
-              {"id":"1","issuer":"GitHub","account":"me","secret":"JBSWY3DPEHPK3PXP",
-               "algorithm":"SHA1","digits":6,"period":30,"type":"TOTP","sortOrder":0,
-               "deleted":false,"updatedAt":1,"createdAt":1}
-            ],"passwords":[
-              {"id":"p1","title":"Email","username":"me@x.com","password":"secret",
-               "sortOrder":0,"deleted":false,"updatedAt":1,"createdAt":1}
-            ]}
-        """.trimIndent()
-        val result = JsonBackupImporter.import(text)
-        assertTrue(result is JsonBackupImporter.Result.Success)
-        result as JsonBackupImporter.Result.Success
-        assertEquals(1, result.entries.size)
-        assertEquals(1, result.passwords.size)
-        assertEquals("Email", result.passwords[0].title)
-    }
-
-    @Test
-    fun oldOwnSchemaWithoutPasswordsStillImports() {
-        val text = """
-            {"version":1,"entries":[
-              {"id":"1","issuer":"GitHub","account":"me","secret":"JBSWY3DPEHPK3PXP",
-               "algorithm":"SHA1","digits":6,"period":30,"type":"TOTP","sortOrder":0,
-               "deleted":false,"updatedAt":1,"createdAt":1}
-            ]}
-        """.trimIndent()
-        val result = JsonBackupImporter.import(text)
-        assertTrue(result is JsonBackupImporter.Result.Success)
-        result as JsonBackupImporter.Result.Success
-        assertEquals(1, result.entries.size)
-        assertEquals(0, result.passwords.size)
-    }
-
-    @Test
     fun importsOwnSchema() {
         val text = """
             {"version":1,"entries":[

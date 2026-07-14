@@ -2,14 +2,11 @@ package com.otpbox.data.backup
 
 import kotlinx.serialization.Serializable
 
-import com.otpbox.domain.model.PasswordEntry
-
 /** Plaintext backup content (what gets encrypted). */
 @Serializable
 data class BackupContent(
-    val version: Int = 2,
-    val entries: List<com.otpbox.domain.model.OtpEntry> = emptyList(),
-    val passwords: List<com.otpbox.domain.model.PasswordEntry> = emptyList()
+    val version: Int = 1,
+    val entries: List<com.otpbox.domain.model.OtpEntry>
 )
 
 /** Encrypted backup envelope (what is written to file / GitHub gist). */

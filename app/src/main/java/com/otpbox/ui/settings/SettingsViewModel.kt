@@ -6,7 +6,6 @@ import com.otpbox.data.backup.BackupContent
 import com.otpbox.data.backup.BackupEncryptor
 import com.otpbox.data.crypto.SecurePrefs
 import com.otpbox.data.repo.OtpRepository
-import com.otpbox.data.repo.PasswordRepository
 import com.otpbox.data.settings.SettingsRepository
 import com.otpbox.data.sync.SyncManager
 import com.otpbox.data.sync.SyncResult
@@ -38,7 +37,6 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsRepository,
     private val securePrefs: SecurePrefs,
     private val repository: OtpRepository,
-    private val passwordRepository: PasswordRepository,
     private val encryptor: BackupEncryptor,
     private val syncManager: SyncManager,
     private val pinManager: PinManager
@@ -128,8 +126,7 @@ class SettingsViewModel @Inject constructor(
         }
         viewModelScope.launch {
             val entries = repository.getAllIncludingDeleted().filter { !it.deleted }
-            val passwords = passwordRepository.getAllIncludingDeleted().filter { !it.deleted }
-            val envelope = encryptor.encrypt(BackupContent(entries = entries, passwords = passwords), pw)
+            val envelope = encryptor.encrypt(BackupContent(entries = entries), pw)
             _state.update { it.copy(pendingExport = envelope) }
         }
     }

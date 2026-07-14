@@ -1,7 +1,6 @@
 package com.otpbox.data.backup
 
 import com.otpbox.domain.model.OtpEntry
-import com.otpbox.domain.model.PasswordEntry
 import com.otpbox.domain.otp.Base32
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
@@ -19,35 +18,24 @@ object JsonBackupImporter {
     private val json = Json { ignoreUnknownKeys = true }
 
     sealed interface Result {
-        data class Success(
-            val entries: List<OtpEntry>,
-            val passwords: List<PasswordEntry> = emptyList()
-        ) : Result
+        data class Success(val entries: List<OtpEntry>) : Result
         data class Error(val message: String) : Result
     }
 
     fun import(text: String): Result = try {
         val root = json.parseToJsonElement(text).jsonObject
         when {
-            root.containsKey("db") ->
-                Result.Success(importAegis(root))
-            root.containsKey("entries") -> {
-                val own = importOwn(text)
-                Result.Success(own.entries, own.passwords)
-            }
+            root.containsKey("db") -> Result.Success(importAegis(root))
+            root.containsKey("entries") -> Result.Success(importOwn(text))
             else -> Result.Error("Unrecognized backup file")
         }
     } catch (e: Exception) {
         Result.Error(e.message ?: "Failed to import backup")
     }
 
-    private fun importOwn(text: String): Result.Success {
+    private fun importOwn(text: String): List<OtpEntry> {
         val content = json.decodeFromString<BackupContent>(text)
-        val entries = content.entries.filter {
-            it.type.equals("TOTP", ignoreCase = true) && !it.deleted
-        }
-        val passwords = content.passwords.filter { !it.deleted }
-        return Result.Success(entries = entries, passwords = passwords)
+        return content.entries.filter { it.type.equals("TOTP", ignoreCase = true) && !it.deleted }
     }
 
     private fun importAegis(root: kotlinx.serialization.json.JsonObject): List<OtpEntry> {

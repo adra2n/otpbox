@@ -117,8 +117,7 @@ object AppModule {
     fun provideSyncManager(
         api: GitHubApi,
         repository: OtpRepository,
-        passwordRepository: PasswordRepository,
         encryptor: BackupEncryptor,
         securePrefs: SecurePrefs
-    ): SyncManager = SyncManager(api, repository, passwordRepository, encryptor, securePrefs)
+    ): SyncManager = SyncManager(api, repository, encryptor, securePrefs)
 }
