@@ -8,18 +8,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -57,11 +61,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    val scroll = rememberScrollState()
-
-    var backupPw by remember { mutableStateOf("") }
-    var githubToken by remember { mutableStateOf("") }
-    var gistId by remember { mutableStateOf(state.gistId) }
+    var selectedCategory by remember { mutableStateOf<String?>(null) }
     var showPinDialog by remember { mutableStateOf(false) }
 
     val exportLauncher = rememberLauncherForActivityResult(
@@ -88,149 +88,41 @@ fun SettingsScreen(
         }
     }
 
+    val title = if (selectedCategory == null) "设置" else selectedCategory!!
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(title) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = {
+                        if (selectedCategory != null) selectedCategory = null else onBack()
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "返回")
                     }
                 }
             )
         },
         snackbarHost = { SnackbarHost(snackbar) }
     ) { padding ->
-        Column(
-            modifier = Modifier.padding(padding).padding(16.dp).verticalScroll(scroll),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SectionTitle("安全")
-            SwitchRow("应用锁（指纹 / 面容 / PIN）", state.appLockEnabled, viewModel::setAppLock)
-            SwitchRow("阻止截屏与录屏", state.secureScreen, viewModel::setSecureScreen)
-
-            if (state.appLockEnabled) {
-                Text("自动锁定", style = MaterialTheme.typography.labelLarge)
-                val options = listOf(0 to "立即", 60 to "1 分钟后", 300 to "5 分钟后")
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    options.forEach { (secs, label) ->
-                        FilterChip(
-                            selected = state.autoLockSeconds == secs,
-                            onClick = { viewModel.setAutoLockSeconds(secs) },
-                            label = { Text(label) }
-                        )
-                    }
-                }
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column {
-                        Text("PIN 码备用解锁")
-                        Text(
-                            if (state.pinSet) "已设置 6 位 PIN 码" else "未设置",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    if (state.pinSet) {
-                        TextButton(onClick = viewModel::clearPin) { Text("清除") }
-                    } else {
-                        TextButton(onClick = { showPinDialog = true }) { Text("设置") }
-                    }
-                }
-            }
-
-            Divider()
-            SectionTitle("备份密码")
-            Text(
-                if (state.backupPasswordSet) "已设置备份密码。"
-                else "设置一个密码用于加密导出和云同步。",
-                style = MaterialTheme.typography.bodySmall
+        when (selectedCategory) {
+            null -> SettingsCategoryList(
+                modifier = Modifier.padding(padding),
+                onSelect = { selectedCategory = it }
             )
-            OutlinedTextField(
-                value = backupPw,
-                onValueChange = { backupPw = it },
-                label = { Text("备份密码") },
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            "安全" -> SecuritySettings(
+                modifier = Modifier.padding(padding),
+                state = state,
+                viewModel = viewModel,
+                onSetPin = { showPinDialog = true }
             )
-            Button(
-                onClick = { viewModel.setBackupPassword(backupPw); backupPw = "" },
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("保存备份密码") }
-
-            Divider()
-            SectionTitle("导出")
-            OutlinedButton(onClick = viewModel::requestExport, modifier = Modifier.fillMaxWidth()) {
-                Text("导出加密备份")
-            }
-
-            Divider()
-            SectionTitle("GitHub Gist 同步")
-            OutlinedTextField(
-                value = githubToken,
-                onValueChange = { githubToken = it },
-                label = { Text("GitHub Token（gist 权限）") },
-                visualTransformation = PasswordVisualTransformation(),
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
+            "备份与同步" -> BackupSyncSettings(
+                modifier = Modifier.padding(padding),
+                state = state,
+                viewModel = viewModel
             )
-            Button(
-                onClick = { viewModel.setGithubToken(githubToken); githubToken = "" },
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("保存 Token") }
-            Text(
-                if (state.hasGithubToken) "Token 已设置。" else "尚未设置 Token。",
-                style = MaterialTheme.typography.bodySmall
-            )
-            OutlinedTextField(
-                value = gistId,
-                onValueChange = { gistId = it },
-                label = { Text("Gist ID（留空则首次推送时自动创建）") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            OutlinedButton(
-                onClick = { viewModel.setGistId(gistId) },
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("保存 Gist ID") }
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
-                    onClick = viewModel::push,
-                    enabled = !state.syncing,
-                    modifier = Modifier.weight(1f)
-                ) { Text("推送") }
-                Button(
-                    onClick = viewModel::pull,
-                    enabled = !state.syncing,
-                    modifier = Modifier.weight(1f)
-                ) { Text("拉取") }
-            }
-            if (state.syncing) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
-                    Text("同步中…")
-                }
-            }
-            if (state.lastSyncAt > 0) {
-                Text(
-                    "上次同步：${java.text.DateFormat.getDateTimeInstance().format(state.lastSyncAt)}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-
-            Divider()
-            Text(
-                "口令盒子 v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
+            "关于" -> AboutSettings(
+                modifier = Modifier.padding(padding)
             )
         }
     }
@@ -242,6 +134,194 @@ fun SettingsScreen(
                 viewModel.setPin(pin)
                 showPinDialog = false
             }
+        )
+    }
+}
+
+@Composable
+private fun SettingsCategoryList(
+    modifier: Modifier,
+    onSelect: (String) -> Unit
+) {
+    val categories = listOf(
+        Triple("安全", "应用锁 · 自动锁定 · PIN", Icons.Default.Lock),
+        Triple("备份与同步", "备份密码 · 导出 · GitHub Gist", Icons.Default.CloudUpload),
+        Triple("关于", "版本信息", Icons.Default.Info)
+    )
+    Column(modifier.padding(16.dp).verticalScroll(rememberScrollState())) {
+        categories.forEach { (name, desc, icon) ->
+            ListItem(
+                headlineContent = { Text(name) },
+                supportingContent = { Text(desc) },
+                leadingContent = { Icon(icon, contentDescription = null) },
+                trailingContent = { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                modifier = Modifier.clickable { onSelect(name) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun SecuritySettings(
+    modifier: Modifier,
+    state: SettingsUiState,
+    viewModel: SettingsViewModel,
+    onSetPin: () -> Unit
+) {
+    Column(
+        modifier.padding(16.dp).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SectionTitle("安全")
+        SwitchRow("应用锁（指纹 / 面容 / PIN）", state.appLockEnabled, viewModel::setAppLock)
+        SwitchRow("阻止截屏与录屏", state.secureScreen, viewModel::setSecureScreen)
+
+        if (state.appLockEnabled) {
+            Text("自动锁定", style = MaterialTheme.typography.labelLarge)
+            val options = listOf(0 to "立即", 60 to "1 分钟后", 300 to "5 分钟后")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                options.forEach { (secs, label) ->
+                    FilterChip(
+                        selected = state.autoLockSeconds == secs,
+                        onClick = { viewModel.setAutoLockSeconds(secs) },
+                        label = { Text(label) }
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text("PIN 码备用解锁")
+                    Text(
+                        if (state.pinSet) "已设置 6 位 PIN 码" else "未设置",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (state.pinSet) {
+                    TextButton(onClick = viewModel::clearPin) { Text("清除") }
+                } else {
+                    TextButton(onClick = onSetPin) { Text("设置") }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BackupSyncSettings(
+    modifier: Modifier,
+    state: SettingsUiState,
+    viewModel: SettingsViewModel
+) {
+    var backupPw by remember { mutableStateOf("") }
+    var githubToken by remember { mutableStateOf("") }
+    var gistId by remember { mutableStateOf(state.gistId) }
+
+    Column(
+        modifier.padding(16.dp).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SectionTitle("备份密码")
+        Text(
+            if (state.backupPasswordSet) "已设置备份密码。"
+            else "设置一个密码用于加密导出和云同步。",
+            style = MaterialTheme.typography.bodySmall
+        )
+        OutlinedTextField(
+            value = backupPw,
+            onValueChange = { backupPw = it },
+            label = { Text("备份密码") },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = { viewModel.setBackupPassword(backupPw); backupPw = "" },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("保存备份密码") }
+
+        SectionTitle("导出")
+        OutlinedButton(onClick = viewModel::requestExport, modifier = Modifier.fillMaxWidth()) {
+            Text("导出加密备份")
+        }
+
+        SectionTitle("GitHub Gist 同步")
+        OutlinedTextField(
+            value = githubToken,
+            onValueChange = { githubToken = it },
+            label = { Text("GitHub Token（gist 权限）") },
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Button(
+            onClick = { viewModel.setGithubToken(githubToken); githubToken = "" },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("保存 Token") }
+        Text(
+            if (state.hasGithubToken) "Token 已设置。" else "尚未设置 Token。",
+            style = MaterialTheme.typography.bodySmall
+        )
+        OutlinedTextField(
+            value = gistId,
+            onValueChange = { gistId = it },
+            label = { Text("Gist ID（留空则首次推送时自动创建）") },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedButton(
+            onClick = { viewModel.setGistId(gistId) },
+            modifier = Modifier.fillMaxWidth()
+        ) { Text("保存 Gist ID") }
+
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(
+                onClick = viewModel::push,
+                enabled = !state.syncing,
+                modifier = Modifier.weight(1f)
+            ) { Text("推送") }
+            Button(
+                onClick = viewModel::pull,
+                enabled = !state.syncing,
+                modifier = Modifier.weight(1f)
+            ) { Text("拉取") }
+        }
+        if (state.syncing) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(modifier = Modifier.padding(end = 8.dp))
+                Text("同步中…")
+            }
+        }
+        if (state.lastSyncAt > 0) {
+            Text(
+                "上次同步：${java.text.DateFormat.getDateTimeInstance().format(state.lastSyncAt)}",
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Composable
+private fun AboutSettings(modifier: Modifier) {
+    Column(
+        modifier.padding(16.dp).verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SectionTitle("关于")
+        Text(
+            "口令盒子 v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Text(
+            "本地加密存储的 TOTP 两步验证与验证码管理工具。",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
