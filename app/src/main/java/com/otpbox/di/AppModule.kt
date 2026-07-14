@@ -6,12 +6,8 @@ import com.otpbox.data.crypto.DbKeyManager
 import com.otpbox.data.crypto.SecurePrefs
 import com.otpbox.data.local.OtpDao
 import com.otpbox.data.local.OtpDatabase
-import com.otpbox.data.local.PasswordDao
-import com.otpbox.data.local.PasswordEntryEntity
 import com.otpbox.data.repo.OtpRepository
 import com.otpbox.data.repo.OtpRepositoryImpl
-import com.otpbox.data.repo.PasswordRepository
-import com.otpbox.data.repo.PasswordRepositoryImpl
 import com.otpbox.data.settings.SettingsRepository
 import com.otpbox.data.sync.GitHubApi
 import com.otpbox.data.sync.SyncManager
@@ -66,7 +62,6 @@ object AppModule {
         val factory = SupportFactory(passphrase)
         return Room.databaseBuilder(context, OtpDatabase::class.java, OtpDatabase.NAME)
             .openHelperFactory(factory)
-            .addMigrations(OtpDatabase.MIGRATION_1_2)
             .build()
     }
 
@@ -74,15 +69,8 @@ object AppModule {
     fun provideOtpDao(database: OtpDatabase): OtpDao = database.otpDao()
 
     @Provides
-    fun providePasswordDao(database: OtpDatabase): PasswordDao = database.passwordDao()
-
-    @Provides
     @Singleton
     fun provideOtpRepository(dao: OtpDao): OtpRepository = OtpRepositoryImpl(dao)
-
-    @Provides
-    @Singleton
-    fun providePasswordRepository(dao: PasswordDao): PasswordRepository = PasswordRepositoryImpl(dao)
 
     @Provides
     @Singleton
