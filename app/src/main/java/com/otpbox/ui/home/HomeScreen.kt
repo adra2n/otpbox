@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -153,9 +155,11 @@ fun HomeScreen(
         if (state.items.isEmpty() && !state.loading) {
             EmptyState(Modifier.fillMaxSize().padding(padding))
         } else {
-            LazyColumn(
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize().padding(padding),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(state.items, key = { it.entry.id }) { item ->
