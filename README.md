@@ -100,7 +100,7 @@ app/src/main/java/com/otpbox/
 
 如果这个应用对你有帮助，欢迎扫码赞赏支持开发：
 
-![赞赏码](赞赏码.jpg)
+<img src="赞赏码.jpg" width="240" alt="赞赏码">
 
 ## 许可证
 
