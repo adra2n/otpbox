@@ -1,9 +1,5 @@
 package com.otpbox.ui.home
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -87,6 +83,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val codes by viewModel.codes.collectAsStateWithLifecycle()
     val clipboard = LocalClipboardManager.current
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -155,28 +152,23 @@ fun HomeScreen(
         if (state.items.isEmpty() && !state.loading) {
             EmptyState(Modifier.fillMaxSize().padding(padding))
         } else {
-            Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-                CountdownBar(
-                    progress = state.globalProgress,
-                    remaining = state.globalRemaining
-                )
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    items(state.items, key = { it.entry.id }) { item ->
-                        OtpCard(
-                            item = item,
-                            onCopy = {
-                                clipboard.setText(AnnotatedString(item.code))
-                                scope.launch { snackbar.showSnackbar("验证码已复制") }
-                            },
-                            onOpenDetail = { onOpenDetail(item.entry.id) }
-                        )
-                    }
-                    item { Spacer(Modifier.size(72.dp)) }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(state.items, key = { it.entry.id }) { item ->
+                    val live = codes[item.entry.id] ?: item
+                    OtpCard(
+                        item = live,
+                        onCopy = {
+                            clipboard.setText(AnnotatedString(live.code))
+                            scope.launch { snackbar.showSnackbar("验证码已复制") }
+                        },
+                        onOpenDetail = { onOpenDetail(item.entry.id) }
+                    )
                 }
+                item { Spacer(Modifier.size(72.dp)) }
             }
         }
     }
@@ -209,39 +201,6 @@ fun HomeScreen(
             )
             Spacer(Modifier.size(24.dp))
         }
-    }
-}
-
-@Composable
-private fun CountdownBar(progress: Float, remaining: Int) {
-    val color = if (remaining <= 5) WarnAmber else MaterialTheme.colorScheme.primary
-    val animated by animateFloatAsState(
-        targetValue = progress,
-        animationSpec = if (progress >= 0.99f) snap() else tween(1000, easing = LinearEasing),
-        label = "countdown"
-    )
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        LinearProgressIndicator(
-            progress = { animated },
-            modifier = Modifier
-                .weight(1f)
-                .height(6.dp)
-                .clip(RoundedCornerShape(3.dp)),
-            color = color,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-        Spacer(Modifier.width(10.dp))
-        Text(
-            text = "${remaining}s",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
     }
 }
 
@@ -293,6 +252,25 @@ private fun OtpCard(
                     color = MaterialTheme.colorScheme.primary
                 )
             }
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "${item.remainingSeconds}s",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (item.remainingSeconds <= 5) WarnAmber else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.size(4.dp))
+                LinearProgressIndicator(
+                    progress = { item.progress },
+                    modifier = Modifier
+                        .width(48.dp)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = if (item.remainingSeconds <= 5) WarnAmber else MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+            Spacer(Modifier.width(8.dp))
             IconButton(onClick = onCopy) {
                 Icon(
                     Icons.Default.ContentCopy,
