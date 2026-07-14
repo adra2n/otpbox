@@ -85,7 +85,10 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         super.onStop()
-        if (appLockEnabled) backgroundedAt = SystemClock.elapsedRealtime()
+        if (appLockEnabled) {
+            backgroundedAt = SystemClock.elapsedRealtime()
+            lockedState.value = true
+        }
     }
 
     override fun onResume() {
