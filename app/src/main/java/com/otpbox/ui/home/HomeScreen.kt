@@ -66,6 +66,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -226,63 +227,70 @@ private fun OtpCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Avatar(title)
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1
-                )
-                if (entry.account.isNotBlank() && entry.issuer.isNotBlank()) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Avatar(title)
+                Spacer(Modifier.width(10.dp))
+                Column(Modifier.weight(1f)) {
                     Text(
-                        text = entry.account,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (entry.account.isNotBlank() && entry.issuer.isNotBlank()) {
+                        Text(
+                            text = entry.account,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+                Box(
+                    modifier = Modifier.size(34.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        progress = { item.progress },
+                        modifier = Modifier.fillMaxSize(),
+                        strokeWidth = 3.dp,
+                        color = if (item.remainingSeconds <= 5) WarnAmber else MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                    Text(
+                        text = "${item.remainingSeconds}",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (item.remainingSeconds <= 5) WarnAmber else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(Modifier.size(4.dp))
-                Text(
-                    text = formatCode(item.code),
-                    fontFamily = FontFamily.Monospace,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 28.sp,
-                    letterSpacing = 3.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Spacer(Modifier.width(4.dp))
+                IconButton(
+                    onClick = onCopy,
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.ContentCopy,
+                        contentDescription = "复制",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
-            Box(
-                modifier = Modifier.size(40.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    progress = { item.progress },
-                    modifier = Modifier.fillMaxSize(),
-                    strokeWidth = 3.dp,
-                    color = if (item.remainingSeconds <= 5) WarnAmber else MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-                Text(
-                    text = "${item.remainingSeconds}",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = if (item.remainingSeconds <= 5) WarnAmber else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Spacer(Modifier.width(8.dp))
-            IconButton(onClick = onCopy) {
-                Icon(
-                    Icons.Default.ContentCopy,
-                    contentDescription = "复制",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+            Spacer(Modifier.size(8.dp))
+            Text(
+                text = formatCode(item.code),
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                letterSpacing = 3.sp,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
