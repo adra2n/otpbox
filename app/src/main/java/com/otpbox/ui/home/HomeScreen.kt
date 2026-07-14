@@ -227,14 +227,14 @@ private fun OtpCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Avatar(title)
+                Avatar(title, 32.dp)
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -249,8 +249,23 @@ private fun OtpCard(
                         )
                     }
                 }
+            }
+            Spacer(Modifier.size(8.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = formatCode(item.code),
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp,
+                    letterSpacing = 3.sp,
+                    maxLines = 1,
+                    softWrap = false,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.primary
+                )
                 Box(
-                    modifier = Modifier.size(34.dp),
+                    modifier = Modifier.size(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(
@@ -267,46 +282,23 @@ private fun OtpCard(
                         color = if (item.remainingSeconds <= 5) WarnAmber else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(Modifier.width(4.dp))
-                IconButton(
-                    onClick = onCopy,
-                    modifier = Modifier.size(32.dp)
-                ) {
-                    Icon(
-                        Icons.Default.ContentCopy,
-                        contentDescription = "复制",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
-            Spacer(Modifier.size(8.dp))
-            Text(
-                text = formatCode(item.code),
-                fontFamily = FontFamily.Monospace,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                letterSpacing = 3.sp,
-                maxLines = 1,
-                softWrap = false,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.primary
-            )
         }
     }
 }
 
 @Composable
-private fun Avatar(name: String) {
+private fun Avatar(name: String, size: androidx.compose.ui.unit.Dp = 44.dp) {
     val bg = avatarColorFor(name)
     Box(
-        modifier = Modifier.size(44.dp).clip(CircleShape).background(bg),
+        modifier = Modifier.size(size).clip(CircleShape).background(bg),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = name.trim().take(1).uppercase(),
             color = Color.White,
             fontWeight = FontWeight.Bold,
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleSmall
         )
     }
 }
