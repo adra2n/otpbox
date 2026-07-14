@@ -23,7 +23,8 @@ object OtpAuthUriParser {
         val slash = rest.indexOf('/')
         require(slash > 0) { "Missing OTP type" }
         val type = rest.substring(0, slash).lowercase()
-        require(type == "totp") { "Only TOTP is supported (got '$type')" }
+        require(type == "totp") { "Unsupported OTP type: '$type' (only TOTP is supported)" }
+        val isHotp = false
 
         val afterType = rest.substring(slash + 1)
         val q = afterType.indexOf('?')
@@ -44,8 +45,10 @@ object OtpAuthUriParser {
         val digits = params["digits"]?.toIntOrNull() ?: 6
         require(digits in 4..10) { "Unsupported digits: $digits" }
 
-        val period = params["period"]?.toIntOrNull() ?: 30
-        require(period in 1..300) { "Invalid period: $period" }
+        val period = if (isHotp) 30 else (params["period"]?.toIntOrNull() ?: 30)
+        if (!isHotp) require(period in 1..300) { "Invalid period: $period" }
+
+        val counter = if (isHotp) (params["counter"]?.toLongOrNull() ?: 0L) else 0L
 
         val now = System.currentTimeMillis()
         return OtpEntry(
@@ -56,7 +59,8 @@ object OtpAuthUriParser {
             algorithm = algorithm,
             digits = digits,
             period = period,
-            type = "TOTP",
+            type = if (isHotp) "HOTP" else "TOTP",
+            counter = counter,
             updatedAt = now,
             createdAt = now
         )

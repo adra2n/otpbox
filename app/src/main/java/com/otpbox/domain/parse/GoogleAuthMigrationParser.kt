@@ -71,13 +71,13 @@ object GoogleAuthMigrationParser {
             }
         }
 
-        if (type != 2) return null // only TOTP
+        if (type != 2) return null // only TOTP(2); HOTP(1) is not supported
         if (secret.isEmpty()) return null
 
         val algoName = when (algorithm) {
-            2 -> "SHA256"
-            3 -> "SHA512"
-            else -> "SHA1"
+             2 -> "SHA256"
+             3 -> "SHA512"
+             else -> "SHA1"
         }
         val digitCount = if (digits == 2) 8 else 6
 
@@ -94,6 +94,7 @@ object GoogleAuthMigrationParser {
             digits = digitCount,
             period = 30,
             type = "TOTP",
+            counter = 0L,
             updatedAt = now,
             createdAt = now
         )

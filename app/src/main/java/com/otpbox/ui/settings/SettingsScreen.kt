@@ -229,7 +229,7 @@ private fun BackupSyncSettings(
     ) {
         SectionTitle("备份密码")
         Text(
-            if (state.backupPasswordSet) "已设置备份密码。"
+            if (state.hasBackupPassword) "已设置备份密码。"
             else "设置一个密码用于加密导出和云同步。",
             style = MaterialTheme.typography.bodySmall
         )

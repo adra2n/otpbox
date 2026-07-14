@@ -23,7 +23,7 @@ data class SettingsUiState(
     val secureScreen: Boolean = true,
     val autoLockSeconds: Int = 0,
     val pinSet: Boolean = false,
-    val backupPasswordSet: Boolean = false,
+    val hasBackupPassword: Boolean = false,
     val hasGithubToken: Boolean = false,
     val gistId: String = "",
     val lastSyncAt: Long = 0,
@@ -62,7 +62,7 @@ class SettingsViewModel @Inject constructor(
         _state.update {
             it.copy(
                 pinSet = pinManager.isPinSet,
-                backupPasswordSet = !securePrefs.backupPassword.isNullOrBlank(),
+                hasBackupPassword = !securePrefs.backupPassword.isNullOrBlank(),
                 hasGithubToken = !securePrefs.githubPat.isNullOrBlank(),
                 gistId = securePrefs.gistId.orEmpty(),
                 lastSyncAt = securePrefs.lastSyncAt
@@ -98,7 +98,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setBackupPassword(pw: String) {
         securePrefs.backupPassword = pw.ifBlank { null }
-        viewModelScope.launch { settings.setBackupPasswordSet(pw.isNotBlank()) }
         refreshSecure()
         _state.update { it.copy(message = if (pw.isBlank()) "Backup password cleared" else "Backup password saved") }
     }

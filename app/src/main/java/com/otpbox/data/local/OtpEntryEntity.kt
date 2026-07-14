@@ -19,6 +19,7 @@ data class OtpEntryEntity(
     val icon: String?,
     val sortOrder: Int,
     val deleted: Boolean,
+    val counter: Long,
     val updatedAt: Long,
     val createdAt: Long
 )
@@ -37,6 +38,7 @@ fun OtpEntryEntity.toDomain(): OtpEntry = OtpEntry(
     icon = icon,
     sortOrder = sortOrder,
     deleted = deleted,
+    counter = counter,
     updatedAt = updatedAt,
     createdAt = createdAt
 )
@@ -55,6 +57,7 @@ fun OtpEntry.toEntity(): OtpEntryEntity = OtpEntryEntity(
     icon = icon,
     sortOrder = sortOrder,
     deleted = deleted,
+    counter = counter,
     updatedAt = updatedAt,
     createdAt = createdAt
 )

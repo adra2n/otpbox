@@ -18,7 +18,6 @@ class SettingsRepository(private val context: Context) {
     private val appLockKey = booleanPreferencesKey("app_lock_enabled")
     private val sortOrderKey = stringPreferencesKey("sort_order")
     private val secureScreenKey = booleanPreferencesKey("secure_screen")
-    private val backupPasswordSetKey = booleanPreferencesKey("backup_password_set")
     private val autoLockSecondsKey = intPreferencesKey("auto_lock_seconds")
 
     val appLockEnabled: Flow<Boolean> =
@@ -37,9 +36,6 @@ class SettingsRepository(private val context: Context) {
                 .getOrDefault(SortOrder.CUSTOM)
         }
 
-    val backupPasswordSet: Flow<Boolean> =
-        context.dataStore.data.map { it[backupPasswordSetKey] ?: false }
-
     suspend fun setAppLockEnabled(enabled: Boolean) {
         context.dataStore.edit { it[appLockKey] = enabled }
     }
@@ -54,9 +50,5 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setSortOrder(order: SortOrder) {
         context.dataStore.edit { it[sortOrderKey] = order.name }
-    }
-
-    suspend fun setBackupPasswordSet(set: Boolean) {
-        context.dataStore.edit { it[backupPasswordSetKey] = set }
     }
 }

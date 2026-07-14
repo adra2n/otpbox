@@ -17,6 +17,7 @@ data class OtpEntry(
     val icon: String? = null,
     val sortOrder: Int = 0,
     val deleted: Boolean = false,
+    val counter: Long = 0,
     val updatedAt: Long = System.currentTimeMillis(),
     val createdAt: Long = System.currentTimeMillis()
 )

@@ -63,10 +63,20 @@ object TotpGenerator {
 
     /** Convenience: generate code + countdown info for an entry. */
     fun codeFor(entry: OtpEntry, timeMillis: Long = System.currentTimeMillis()): OtpCode {
-        val code = generate(entry.secret, entry.algorithm, entry.digits, entry.period, timeMillis)
-        val seconds = timeMillis / 1000L
-        val remaining = (entry.period - (seconds % entry.period)).toInt()
-        val progress = remaining.toFloat() / entry.period.toFloat()
-        return OtpCode(code = code, remainingSeconds = remaining, progress = progress)
+        return if (entry.type.equals("HOTP", ignoreCase = true)) {
+            val code = generateForCounter(
+                Base32.decode(entry.secret),
+                entry.counter,
+                entry.algorithm,
+                entry.digits
+            )
+            OtpCode(code = code, remainingSeconds = 0, progress = 1f)
+        } else {
+            val code = generate(entry.secret, entry.algorithm, entry.digits, entry.period, timeMillis)
+            val seconds = timeMillis / 1000L
+            val remaining = (entry.period - (seconds % entry.period)).toInt()
+            val progress = remaining.toFloat() / entry.period.toFloat()
+            OtpCode(code = code, remainingSeconds = remaining, progress = progress)
+        }
     }
 }
