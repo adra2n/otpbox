@@ -1,5 +1,7 @@
 # OTPBox (口令盒子)
 
+> 中文文档：[readme_cn.md](readme_cn.md)
+
 A privacy- and security-focused Android two-factor authentication (2FA / TOTP) app. All secrets are stored encrypted on the device, with biometric / PIN app lock, and optional end-to-end encrypted sync via your own GitHub Gist.
 
 > Implements RFC 6238 (TOTP) and is compatible with imports and migrations from mainstream authenticators such as Google Authenticator and Aegis.
