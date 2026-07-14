@@ -1,6 +1,7 @@
 package com.otpbox.data.sync
 
 import com.otpbox.domain.model.OtpEntry
+import com.otpbox.domain.model.PasswordEntry
 
 /**
  * Merges local and remote entry sets for GitHub sync. Union by id; for a given
@@ -21,5 +22,15 @@ object SyncMerger {
         return byId.values.sortedWith(
             compareBy({ it.sortOrder }, { it.issuer.lowercase() })
         )
+    }
+
+    fun merge(local: List<PasswordEntry>, remote: List<PasswordEntry>): List<PasswordEntry> {
+        val byId = HashMap<String, PasswordEntry>(local.size + remote.size)
+        for (e in local) byId[e.id] = e
+        for (e in remote) {
+            val existing = byId[e.id]
+            if (existing == null || e.updatedAt > existing.updatedAt) byId[e.id] = e
+        }
+        return byId.values.sortedWith(compareBy({ it.sortOrder }, { it.title.lowercase() }))
     }
 }
