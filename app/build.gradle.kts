@@ -41,8 +41,13 @@ android {
         minSdk = 26
         targetSdk = 34
 
-        versionCode = 13
-        versionName = "1.12"
+        versionCode = 14
+        versionName = "1.13.0"
+
+        // 友盟 AppKey：从 local.properties 的 UMENG_APPKEY 读取，不写死、不进 git
+        val umengKey = localProps.getProperty("UMENG_APPKEY") ?: ""
+        buildConfigField("String", "UMENG_APPKEY", "\"$umengKey\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
         ndk { abiFilters += "arm64-v8a" }
@@ -137,6 +142,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit.serialization)
     implementation(libs.coroutines.android)
+
+    // 友盟 U-App 移动统计（必选 common + asms；缺失会在初始化时报错/Toast）
+    implementation("com.umeng.umsdk:common:9.9.2")
+    implementation("com.umeng.umsdk:asms:1.8.4")
 
     testImplementation(libs.junit)
     testImplementation(libs.mockk)
