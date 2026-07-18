@@ -30,6 +30,9 @@
 - 默认开启 `FLAG_SECURE`，阻止截屏与录屏
 - 关闭系统自动备份，防止密钥外泄
 
+### 使用统计（合规）
+- **友盟 U-App** 匿名使用统计，仅在用户**勾选同意隐私政策后**初始化，未同意不采集任何数据。
+
 ### 备份与同步
 - **加密导出**：PBKDF2-HMAC-SHA256 (600k) 派生密钥 + AES-256-GCM 信封
 - **GitHub Gist 同步**：手动推送 / 拉取，云端仅存密文
@@ -46,6 +49,7 @@
 | 相机 / 识别 | CameraX · ML Kit Barcode Scanning |
 | 网络 | Retrofit · OkHttp · kotlinx.serialization |
 | 加密 | Android Keystore · AES-256-GCM · PBKDF2 |
+| 统计 | 友盟 U-App（隐私同意后初始化） |
 
 - **minSdk** 26 · **target/compileSdk** 34
 - **Gradle** 8.9 · **AGP** 8.7.3 · **Kotlin** 2.0.21 · **JDK** 21
@@ -102,6 +106,13 @@ app/src/main/java/com/otpbox/
 如果这个应用对你有帮助，欢迎扫码赞赏支持开发：
 
 <img src="赞赏码.jpg" width="240" alt="赞赏码">
+
+## 更新记录
+
+- **v1.13.0**（versionCode 14，2026-07-18）
+  - 集成友盟 U-App 匿名使用统计，仅在用户同意隐私政策后初始化（未同意不采集）。
+  - Release APK：`koulinghezi-v1.13.0-release.apk`
+- **v1.12.0**（versionCode 13）：上一版本。
 
 ## 许可证
 

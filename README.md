@@ -31,6 +31,9 @@ A privacy- and security-focused Android two-factor authentication (2FA / TOTP) a
 - `FLAG_SECURE` enabled by default to block screenshots and screen recording
 - Android auto-backup disabled to prevent secret leakage
 
+### Analytics (privacy-respecting)
+- **U-App (Umeng)** anonymous usage statistics, initialized **only after** the user accepts the privacy policy; no data is collected before consent.
+
 ### Backup & sync
 - **Encrypted export**: key derived with PBKDF2-HMAC-SHA256 (600k iterations) + AES-256-GCM envelope
 - **GitHub Gist sync**: manual push / pull; only ciphertext is ever stored in the cloud
@@ -47,6 +50,7 @@ A privacy- and security-focused Android two-factor authentication (2FA / TOTP) a
 | Camera / recognition | CameraX · ML Kit Barcode Scanning |
 | Networking | Retrofit · OkHttp · kotlinx.serialization |
 | Cryptography | Android Keystore · AES-256-GCM · PBKDF2 |
+| Analytics | Umeng U-App (initialized after privacy consent) |
 
 - **minSdk** 26 · **target/compileSdk** 34
 - **Gradle** 8.9 · **AGP** 8.7.3 · **Kotlin** 2.0.21 · **JDK** 21
@@ -103,6 +107,13 @@ app/src/main/java/com/otpbox/
 If this app helps you, feel free to scan the code below to support development:
 
 <img src="赞赏码.jpg" width="240" alt="Donation QR code">
+
+## Changelog
+
+- **v1.13.0** (versionCode 14, 2026-07-18)
+  - Integrated Umeng U-App anonymous usage analytics; initialized only after the user accepts the privacy policy (no collection before consent).
+  - Release APK: `koulinghezi-v1.13.0-release.apk`
+- **v1.12.0** (versionCode 13): previous release.
 
 ## License
 
