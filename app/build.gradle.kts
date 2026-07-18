@@ -22,6 +22,7 @@ android {
     val releaseStorePassword = localProps.getProperty("RELEASE_STORE_PASSWORD")
     val releaseKeyAlias = localProps.getProperty("RELEASE_KEY_ALIAS")
     val releaseKeyPassword = localProps.getProperty("RELEASE_KEY_PASSWORD")
+    val umengAppKey = localProps.getProperty("UMENG_APPKEY") ?: ""
 
     if (releaseStoreFile != null && releaseStorePassword != null &&
         releaseKeyAlias != null && releaseKeyPassword != null
@@ -46,6 +47,8 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
         ndk { abiFilters += "arm64-v8a" }
+        buildConfigField("String", "UMENG_APPKEY", "\"$umengAppKey\"")
+        buildConfigField("String", "UMENG_CHANNEL", "\"official\"")
     }
 
     buildTypes {
@@ -123,6 +126,10 @@ dependencies {
     implementation(libs.security.crypto)
     implementation(libs.datastore.preferences)
     implementation(libs.biometric)
+
+    // 友盟 Android 统计 SDK（U-App）
+    implementation(libs.umeng.common)
+    implementation(libs.umeng.asms)
 
     implementation(libs.camera.core)
     implementation(libs.camera.camera2)

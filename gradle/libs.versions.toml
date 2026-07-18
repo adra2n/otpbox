@@ -13,6 +13,8 @@ sqlcipher = "4.5.4"
 sqlite = "2.4.0"
 securityCrypto = "1.1.0-alpha06"
 datastore = "1.1.1"
+umengCommon = "9.7.9"
+umengAsms = "1.8.3"
 biometric = "1.2.0-alpha05"
 camerax = "1.4.0"
 mlkitBarcode = "17.3.0"
@@ -58,6 +60,8 @@ androidx-sqlite-ktx = { group = "androidx.sqlite", name = "sqlite-ktx", version.
 security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 biometric = { group = "androidx.biometric", name = "biometric-ktx", version.ref = "biometric" }
+umeng-common = { group = "com.umeng.umsdk", name = "common", version.ref = "umengCommon" }
+umeng-asms = { group = "com.umeng.umsdk", name = "asms", version.ref = "umengAsms" }
 
 camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
 camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }

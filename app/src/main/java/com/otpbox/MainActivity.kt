@@ -12,12 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
+import com.otpbox.data.settings.PrivacyStore
 import com.otpbox.data.settings.SettingsRepository
 import com.otpbox.security.BiometricAuthenticator
 import com.otpbox.security.PinManager
+import com.otpbox.ui.PrivacyConsentScreen
 import com.otpbox.ui.lock.LockScreen
 import com.otpbox.ui.nav.OtpNavHost
 import com.otpbox.ui.theme.OTPBoxTheme
+import com.otpbox.util.UmengInit
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -34,6 +37,7 @@ class MainActivity : FragmentActivity() {
     private var backgroundedAt = 0L
     private var isPrompting = false
     private val lockedState = mutableStateOf(false)
+    private val privacyAgreed = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,11 +66,28 @@ class MainActivity : FragmentActivity() {
                 lockedState.value = true
             }
         }
+        // 隐私同意状态需在 Context attach 后读取（构造期 Context 尚未就绪）
+        lifecycleScope.launch {
+            privacyAgreed.value = PrivacyStore(this@MainActivity).isAgreed()
+        }
 
         setContent {
             OTPBoxTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    OtpNavHost()
+                    if (privacyAgreed.value) {
+                        OtpNavHost()
+                    } else {
+                        PrivacyConsentScreen(
+                            onAgree = {
+                                lifecycleScope.launch {
+                                    PrivacyStore(this@MainActivity).setAgreed()
+                                    UmengInit.init(this@MainActivity)
+                                    privacyAgreed.value = true
+                                }
+                            },
+                            onDecline = { finish() }
+                        )
+                    }
                     if (lockedState.value) {
                         LockScreen(
                             pinEnabled = pinManager.isPinSet,
