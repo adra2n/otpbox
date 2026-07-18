@@ -42,8 +42,8 @@ android {
         minSdk = 26
         targetSdk = 34
 
-        versionCode = 13
-        versionName = "1.12"
+        versionCode = 14
+        versionName = "1.13.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
         ndk { abiFilters += "arm64-v8a" }
