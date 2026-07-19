@@ -70,6 +70,12 @@ export ANDROID_HOME=/path/to/android-sdk
 
 Artifacts are placed in `app/build/outputs/apk/debug/`.
 
+## Download
+
+Signed release APKs are published on the [GitHub Releases](https://github.com/adra2n/otpbox/releases) page. The latest stable build is **v1.13.0** (`koulinghezi-v1.13.0-release.apk`).
+
+> Android 13+ requires the `POST_NOTIFICATIONS` permission for code-copy toasts; grant it when prompted. Install via `adb install -r koulinghezi-v1.13.0-release.apk` or sideload from your file manager.
+
 ## GitHub sync setup
 
 1. Generate a Personal Access Token on GitHub with the **gist** scope
