@@ -68,6 +68,10 @@ class MainActivity : FragmentActivity() {
             }
         }
         // 隐私同意状态需在 Context attach 后读取（构造期 Context 尚未就绪）
+        // 同步读取避免 Compose 首帧闪烁
+        privacyAgreed.value = PrivacyStore(this@MainActivity).isAgreedSync()
+
+        // 再异步监听变化（如有其他地方修改）
         lifecycleScope.launch {
             privacyAgreed.value = PrivacyStore(this@MainActivity).isAgreed()
         }
