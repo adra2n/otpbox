@@ -42,8 +42,8 @@ android {
         minSdk = 26
         targetSdk = 34
 
-        versionCode = 15
-        versionName = "1.14.0"
+        versionCode = 16
+        versionName = "1.14.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
         ndk { abiFilters += "arm64-v8a" }
@@ -91,7 +91,7 @@ android {
         val variant = this
         outputs.all {
             val output = this as com.android.build.gradle.internal.api.BaseVariantOutputImpl
-            output.outputFileName = "koulinghezi-v${variant.versionName}-${variant.buildType.name}.apk"
+            output.outputFileName = "口令盒子-koulinghezi-v${variant.versionName}-${variant.buildType.name}.apk"
         }
     }
 }
@@ -127,10 +127,6 @@ dependencies {
     implementation(libs.security.crypto)
     implementation(libs.datastore.preferences)
     implementation(libs.biometric)
-
-    // 友盟 Android 统计 SDK（U-App）
-    implementation(libs.umeng.common)
-    implementation(libs.umeng.asms)
 
     implementation(libs.camera.core)
     implementation(libs.camera.camera2)

@@ -3,7 +3,6 @@ package com.otpbox.util
 import android.content.Context
 import com.umeng.analytics.MobclickAgent
 import com.umeng.commonsdk.UMConfigure
-import com.umeng.union.UMUnionSdk
 
 object UmengInit {
     fun init(context: Context) {
@@ -21,8 +20,5 @@ object UmengInit {
             null
         )
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.AUTO)
-        
-        // 初始化友盟 Union SDK（广告）
-        UMUnionSdk.init(context)
     }
 }

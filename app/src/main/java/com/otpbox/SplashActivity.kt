@@ -17,7 +17,6 @@ import com.umeng.union.UMUnionSdk
 import com.umeng.union.api.UMAdConfig
 import com.umeng.union.api.UMUnionApi
 import com.otpbox.data.settings.PrivacyStore
-import com.otpbox.util.UmengInit
 import kotlinx.coroutines.runBlocking
 
 @SuppressLint("CustomSplashScreen")
@@ -70,7 +69,10 @@ class SplashActivity : Activity() {
 
     private fun loadSplashAd() {
         // 初始化友盟统计 SDK
-        UmengInit.init(this)
+        UMConfigure.preInit(this, BuildConfig.UMENG_APPKEY, BuildConfig.UMENG_CHANNEL)
+        UMConfigure.submitPolicyGrantResult(this, true)
+        UMConfigure.init(this, BuildConfig.UMENG_APPKEY, BuildConfig.UMENG_CHANNEL, UMConfigure.DEVICE_TYPE_PHONE, null)
+        MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.AUTO)
 
         // 初始化广告 SDK
         UMUnionSdk.init(this)
