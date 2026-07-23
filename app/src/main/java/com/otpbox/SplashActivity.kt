@@ -33,7 +33,7 @@ class SplashActivity : Activity() {
         private const val TAG = "SplashActivity"
         private const val SKIP_DELAY = 5000L
         private const val COUNT_DOWN_INTERVAL = 1000L
-        private const val AD_SLOT_ID = "100012523"
+        private const val AD_SLOT_ID = "100012565"
         private const val AD_TIMEOUT = 5000
     }
 
