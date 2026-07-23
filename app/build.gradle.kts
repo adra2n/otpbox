@@ -109,6 +109,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.navigation.compose)
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     debugImplementation(libs.androidx.ui.tooling)
 
     implementation(libs.hilt.android)
