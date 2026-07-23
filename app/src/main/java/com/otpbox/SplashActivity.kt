@@ -38,6 +38,24 @@ class SplashActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 先检查隐私协议状态，未同意直接跳转，不显示启动页
+        val privacyGranted = runBlocking {
+            runCatching {
+                PrivacyStore(this@SplashActivity).isAgreed()
+            }.getOrDefault(false)
+        }
+
+        Log.d(TAG, "privacyGranted: $privacyGranted")
+
+        if (!privacyGranted) {
+            Log.d(TAG, "隐私协议未同意，跳转到隐私协议页面")
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
+        // 已同意，显示启动页并加载广告
         setContentView(R.layout.activity_splash)
 
         splashContainer = findViewById(R.id.splash_container)
@@ -48,44 +66,35 @@ class SplashActivity : Activity() {
             navigateToNext()
         }
 
-        // 先检查隐私协议状态
-        val privacyGranted = runBlocking {
-            runCatching {
-                PrivacyStore(this@SplashActivity).isAgreed()
-            }.getOrDefault(false)
-        }
-
-        Log.d(TAG, "privacyGranted: $privacyGranted")
-
-        if (privacyGranted) {
-            // 已同意隐私协议，加载广告
-            loadSplashAd()
-        } else {
-            // 未同意隐私协议，直接跳转
-            Log.d(TAG, "隐私协议未同意，跳转到隐私协议页面")
-            navigateToNext()
-        }
+        loadSplashAd()
     }
 
     private fun loadSplashAd() {
+        Log.d(TAG, "开始加载开屏广告, AD_SLOT_ID=$AD_SLOT_ID")
+        Log.d(TAG, "UMENG_APPKEY=${BuildConfig.UMENG_APPKEY}")
+
         // 初始化友盟统计 SDK
         UMConfigure.preInit(this, BuildConfig.UMENG_APPKEY, BuildConfig.UMENG_CHANNEL)
         UMConfigure.submitPolicyGrantResult(this, true)
         UMConfigure.init(this, BuildConfig.UMENG_APPKEY, BuildConfig.UMENG_CHANNEL, UMConfigure.DEVICE_TYPE_PHONE, null)
         MobclickAgent.setPageCollectionMode(MobclickAgent.PageMode.AUTO)
+        Log.d(TAG, "友盟统计 SDK 初始化完成")
 
         // 初始化广告 SDK
         UMUnionSdk.init(this)
+        Log.d(TAG, "友盟广告 SDK 初始化完成")
 
         // 构建广告配置
         val adConfig = UMAdConfig.Builder()
             .setSlotId(AD_SLOT_ID)
             .build()
+        Log.d(TAG, "广告配置构建完成")
 
         // 加载开屏广告
+        Log.d(TAG, "开始加载开屏广告...")
         UMUnionSdk.loadSplashAd(adConfig, object : UMUnionApi.AdLoadListener<UMSplashAD> {
             override fun onSuccess(adType: UMUnionApi.AdType?, ad: UMSplashAD?) {
-                Log.d(TAG, "开屏广告加载成功")
+                Log.d(TAG, "开屏广告加载成功, adType=$adType, ad=$ad")
                 splashAd = ad
                 ad?.setAdCloseListener {
                     Log.d(TAG, "广告关闭")
@@ -94,16 +103,18 @@ class SplashActivity : Activity() {
                 // 隐藏兜底布局，显示广告
                 fallbackLayout?.visibility = View.GONE
                 splashContainer?.let { container ->
+                    Log.d(TAG, "显示广告到容器")
                     ad?.show(container)
                 }
             }
 
             override fun onFailure(adType: UMUnionApi.AdType?, msg: String?) {
-                Log.e(TAG, "开屏广告加载失败: $msg")
+                Log.e(TAG, "开屏广告加载失败: adType=$adType, msg=$msg")
                 // 显示兜底布局
                 showFallback()
             }
         }, AD_TIMEOUT)
+        Log.d(TAG, "广告加载请求已发送")
 
         // 启动倒计时兜底
         startCountDown()

@@ -1,5 +1,6 @@
 package com.otpbox
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.view.WindowManager
@@ -82,7 +83,9 @@ class MainActivity : FragmentActivity() {
                                 lifecycleScope.launch {
                                     PrivacyStore(this@MainActivity).setAgreed()
                                     UmengInit.init(this@MainActivity)
-                                    privacyAgreed.value = true
+                                    // 重启 SplashActivity 展示广告
+                                    startActivity(Intent(this@MainActivity, SplashActivity::class.java))
+                                    finish()
                                 }
                             },
                             onDecline = { finish() }
